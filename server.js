@@ -27,6 +27,44 @@ function serve404(res) {
 const server = http.createServer((req, res) => {
   let pathname = url.parse(req.url).pathname;
   
+  // Security: Block access to sensitive files and directories
+  const blockedFiles = [
+    'server.js',
+    'package.json',
+    'package-lock.json',
+    '.env',
+    '.env.example',
+    'test-errors.js',
+    'test-security.js',
+    'CHANGELOG.md',
+    'DEPLOYMENT.md',
+    'FIXES_SUMMARY.md'
+  ];
+  
+  const blockedPatterns = [
+    /^\./,           // Hidden files starting with .
+    /\/\./,          // Hidden files in subdirectories
+    /\.git/,         // Git directory
+    /\.gitignore/,   // Git ignore file
+    /node_modules/,  // Node modules
+  ];
+  
+  // Normalize pathname to prevent path traversal
+  const normalizedPath = path.normalize(pathname).replace(/^(\.\.[\/\\])+/, '');
+  
+  // Check if file/pattern is blocked
+  if (blockedFiles.some(file => normalizedPath === '/' + file || normalizedPath.endsWith('/' + file))) {
+    serve404(res);
+    return;
+  }
+  
+  for (const pattern of blockedPatterns) {
+    if (pattern.test(normalizedPath)) {
+      serve404(res);
+      return;
+    }
+  }
+  
   // Remove leading slash
   if (pathname === '/') {
     pathname = '/index.html';
