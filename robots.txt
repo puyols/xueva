@@ -1,0 +1,13 @@
+# robots.txt for flowers-belka.ru
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /notifications
+Disallow: /admin/
+Disallow: /_next/
+
+# Sitemap
+Sitemap: https://flowers-belka.ru/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 1
