@@ -1,0 +1,24 @@
+# robots.txt for https://flowers-belka.ru
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://flowers-belka.ru/sitemap.xml
+
+# Disallow admin/private areas (if any)
+Disallow: /api/
+Disallow: /_next/webpack-hmr
+
+# Allow search engines to crawl all public pages
+Allow: /bukety_tsvetov
+Allow: /rozy
+Allow: /tulpany
+Allow: /piony
+Allow: /tsvety_v_korobke
+Allow: /sukhotsvety
+Allow: /novosti
+Allow: /dostavka
+Allow: /korzina
+Allow: /checkout
+Allow: /oformlenie

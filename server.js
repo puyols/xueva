@@ -3,8 +3,26 @@ const fs = require('fs');
 const path = require('path');
 const url = require('url');
 
-const PORT = 8080;
+const PORT = process.env.PORT || 8080;
 const PUBLIC_DIR = __dirname;
+
+function serve404(res) {
+  const notFoundPath = path.join(PUBLIC_DIR, '404.html');
+  if (fs.existsSync(notFoundPath)) {
+    fs.readFile(notFoundPath, (err, data) => {
+      if (err) {
+        res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end('404 - Page not found');
+      } else {
+        res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end(data);
+      }
+    });
+  } else {
+    res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end('404 - Page not found');
+  }
+}
 
 const server = http.createServer((req, res) => {
   let pathname = url.parse(req.url).pathname;
@@ -23,8 +41,7 @@ const server = http.createServer((req, res) => {
     if (fs.statSync(filePath).isDirectory()) {
       filePath = path.join(filePath, 'index.html');
       if (!fs.existsSync(filePath)) {
-        res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
-        res.end('404 - File not found');
+        serve404(res);
         return;
       }
     }
@@ -39,8 +56,7 @@ const server = http.createServer((req, res) => {
       if (fs.existsSync(dirPath)) {
         filePath = dirPath;
       } else {
-        res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
-        res.end('404 - File not found');
+        serve404(res);
         return;
       }
     }
@@ -73,14 +89,32 @@ const server = http.createServer((req, res) => {
     case '.gif':
       contentType = 'image/gif';
       break;
+    case '.webp':
+      contentType = 'image/webp';
+      break;
+    case '.ico':
+      contentType = 'image/x-icon';
+      break;
     case '.woff':
       contentType = 'font/woff';
       break;
     case '.woff2':
       contentType = 'font/woff2';
       break;
+    case '.ttf':
+      contentType = 'font/ttf';
+      break;
+    case '.otf':
+      contentType = 'font/otf';
+      break;
     case '.xml':
       contentType = 'application/xml; charset=utf-8';
+      break;
+    case '.pdf':
+      contentType = 'application/pdf';
+      break;
+    case '.txt':
+      contentType = 'text/plain; charset=utf-8';
       break;
   }
   
@@ -101,3 +135,18 @@ server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}/`);
 });
 
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM signal received: closing HTTP server');
+  server.close(() => {
+    console.log('HTTP server closed');
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT signal received: closing HTTP server');
+  server.close(() => {
+    console.log('HTTP server closed');
+    process.exit(0);
+  });
+});
