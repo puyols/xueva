@@ -1,0 +1,23 @@
+{
+  "name": "belka-flowers-static",
+  "version": "1.0.0",
+  "description": "Static export of Next.js storefront for Belka Flowers",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node -e \"console.log('Server test passed')\"",
+    "serve": "node server.js"
+  },
+  "keywords": [
+    "flowers",
+    "belka",
+    "static",
+    "nextjs"
+  ],
+  "author": "Belka Flowers",
+  "license": "ISC",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

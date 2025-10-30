@@ -53,6 +53,7 @@ flowers-belka-nextjs/
 # Logs
 logs/
 *.log
+server*.log
 
 # OS
 Thumbs.db
