@@ -1,0 +1,126 @@
+<svg width="600" height="600" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#f0fdf4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#dcfce7;stop-opacity:1" />
+    </radialGradient>
+    
+    <linearGradient id="rose1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fda4af;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f43f5e;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="rose2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="tulip" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#c084fc;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#9333ea;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="600" height="600" fill="url(#bg)"/>
+  
+  <!-- Large bouquet in center -->
+  <g transform="translate(300, 300)">
+    <!-- Stems -->
+    <line x1="-80" y1="100" x2="-80" y2="250" stroke="#22c55e" stroke-width="8" stroke-linecap="round"/>
+    <line x1="-40" y1="80" x2="-40" y2="240" stroke="#16a34a" stroke-width="8" stroke-linecap="round"/>
+    <line x1="0" y1="90" x2="0" y2="250" stroke="#15803d" stroke-width="8" stroke-linecap="round"/>
+    <line x1="40" y1="85" x2="40" y2="245" stroke="#22c55e" stroke-width="8" stroke-linecap="round"/>
+    <line x1="80" y1="95" x2="80" y2="255" stroke="#16a34a" stroke-width="8" stroke-linecap="round"/>
+    
+    <!-- Leaves -->
+    <ellipse cx="-60" cy="150" rx="15" ry="30" fill="#22c55e" transform="rotate(-30 -60 150)"/>
+    <ellipse cx="-20" cy="140" rx="12" ry="25" fill="#16a34a" transform="rotate(20 -20 140)"/>
+    <ellipse cx="20" cy="160" rx="14" ry="28" fill="#15803d" transform="rotate(-45 20 160)"/>
+    <ellipse cx="60" cy="145" rx="13" ry="26" fill="#22c55e" transform="rotate(35 60 145)"/>
+    
+    <!-- Roses -->
+    <g transform="translate(-80, 100)">
+      <circle cx="0" cy="0" r="25" fill="url(#rose1)"/>
+      <circle cx="-8" cy="-8" r="15" fill="#fda4af" opacity="0.8"/>
+      <circle cx="8" cy="8" r="12" fill="#f43f5e" opacity="0.6"/>
+      <circle cx="0" cy="0" r="8" fill="#be123c"/>
+    </g>
+    
+    <g transform="translate(-40, 80)">
+      <circle cx="0" cy="0" r="28" fill="url(#rose2)"/>
+      <circle cx="-10" cy="-10" r="18" fill="#fbbf24" opacity="0.8"/>
+      <circle cx="10" cy="10" r="14" fill="#f59e0b" opacity="0.6"/>
+      <circle cx="0" cy="0" r="10" fill="#d97706"/>
+    </g>
+    
+    <!-- Tulips -->
+    <g transform="translate(0, 90)">
+      <ellipse cx="0" cy="0" rx="20" ry="35" fill="url(#tulip)"/>
+      <ellipse cx="-5" cy="-10" rx="15" ry="25" fill="#c084fc" opacity="0.7"/>
+      <ellipse cx="5" cy="10" rx="12" ry="20" fill="#9333ea" opacity="0.5"/>
+    </g>
+    
+    <g transform="translate(40, 85)">
+      <ellipse cx="0" cy="0" rx="22" ry="32" fill="#f472b6"/>
+      <ellipse cx="-6" cy="-8" rx="16" ry="24" fill="#ec4899" opacity="0.7"/>
+      <ellipse cx="6" cy="8" rx="13" ry="18" fill="#db2777" opacity="0.5"/>
+    </g>
+    
+    <g transform="translate(80, 95)">
+      <ellipse cx="0" cy="0" rx="24" ry="36" fill="#60a5fa"/>
+      <ellipse cx="-7" cy="-9" rx="17" ry="26" fill="#3b82f6" opacity="0.7"/>
+      <ellipse cx="7" cy="9" rx="14" ry="20" fill="#2563eb" opacity="0.5"/>
+    </g>
+    
+    <!-- Wrapper/Ribbon -->
+    <rect x="-100" y="220" width="200" height="40" fill="#8b5cf6" rx="20"/>
+    <rect x="-95" y="225" width="190" height="30" fill="#a78bfa" rx="15"/>
+    <text x="0" y="245" text-anchor="middle" fill="white" font-family="Arial" font-size="14" font-weight="bold">Belka-flowers</text>
+  </g>
+  
+  <!-- Decorative flowers around -->
+  <g transform="translate(150, 150)">
+    <circle cx="0" cy="0" r="15" fill="#fbbf24" opacity="0.8"/>
+    <circle cx="-8" cy="-8" r="8" fill="#f59e0b"/>
+    <circle cx="8" cy="-8" r="8" fill="#f59e0b"/>
+    <circle cx="-8" cy="8" r="8" fill="#f59e0b"/>
+    <circle cx="8" cy="8" r="8" fill="#f59e0b"/>
+    <circle cx="0" cy="0" r="4" fill="#d97706"/>
+  </g>
+  
+  <g transform="translate(450, 200)">
+    <circle cx="0" cy="0" r="12" fill="#f472b6" opacity="0.8"/>
+    <circle cx="-6" cy="-6" r="6" fill="#ec4899"/>
+    <circle cx="6" cy="-6" r="6" fill="#ec4899"/>
+    <circle cx="-6" cy="6" r="6" fill="#ec4899"/>
+    <circle cx="6" cy="6" r="6" fill="#ec4899"/>
+    <circle cx="0" cy="0" r="3" fill="#db2777"/>
+  </g>
+  
+  <g transform="translate(100, 450)">
+    <circle cx="0" cy="0" r="18" fill="#c084fc" opacity="0.8"/>
+    <circle cx="-10" cy="-10" r="10" fill="#9333ea"/>
+    <circle cx="10" cy="-10" r="10" fill="#9333ea"/>
+    <circle cx="-10" cy="10" r="10" fill="#9333ea"/>
+    <circle cx="10" cy="10" r="10" fill="#9333ea"/>
+    <circle cx="0" cy="0" r="5" fill="#7c3aed"/>
+  </g>
+  
+  <g transform="translate(500, 450)">
+    <circle cx="0" cy="0" r="14" fill="#60a5fa" opacity="0.8"/>
+    <circle cx="-7" cy="-7" r="7" fill="#3b82f6"/>
+    <circle cx="7" cy="-7" r="7" fill="#3b82f6"/>
+    <circle cx="-7" cy="7" r="7" fill="#3b82f6"/>
+    <circle cx="7" cy="7" r="7" fill="#3b82f6"/>
+    <circle cx="0" cy="0" r="4" fill="#2563eb"/>
+  </g>
+  
+  <!-- Floating petals -->
+  <ellipse cx="200" cy="100" rx="8" ry="4" fill="#fda4af" opacity="0.6" transform="rotate(45 200 100)"/>
+  <ellipse cx="400" cy="120" rx="6" ry="3" fill="#c084fc" opacity="0.6" transform="rotate(-30 400 120)"/>
+  <ellipse cx="150" cy="350" rx="7" ry="4" fill="#fbbf24" opacity="0.6" transform="rotate(60 150 350)"/>
+  <ellipse cx="480" cy="380" rx="5" ry="3" fill="#f472b6" opacity="0.6" transform="rotate(-45 480 380)"/>
+  <ellipse cx="350" cy="80" rx="6" ry="3" fill="#60a5fa" opacity="0.6" transform="rotate(30 350 80)"/>
+  <ellipse cx="80" cy="250" rx="8" ry="4" fill="#ec4899" opacity="0.6" transform="rotate(-60 80 250)"/>
+</svg>

@@ -1,0 +1,30 @@
+<svg width="200" height="60" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f97316;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ea580c;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Flower icon -->
+  <g transform="translate(5, 15)">
+    <!-- Flower petals -->
+    <circle cx="15" cy="15" r="6" fill="#f97316" opacity="0.8"/>
+    <circle cx="8" cy="10" r="4" fill="#fb923c" opacity="0.7"/>
+    <circle cx="22" cy="10" r="4" fill="#fb923c" opacity="0.7"/>
+    <circle cx="8" cy="20" r="4" fill="#fb923c" opacity="0.7"/>
+    <circle cx="22" cy="20" r="4" fill="#fb923c" opacity="0.7"/>
+    <!-- Flower center -->
+    <circle cx="15" cy="15" r="3" fill="#fbbf24"/>
+    <!-- Stem -->
+    <rect x="14" y="21" width="2" height="8" fill="#22c55e"/>
+  </g>
+
+  <!-- Logo text -->
+  <text x="40" y="25" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="url(#logoGradient)">
+    belka-
+  </text>
+  <text x="40" y="45" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#ea580c">
+    flowers
+  </text>
+</svg>

@@ -1,0 +1,72 @@
+{
+  "name": "Flowers Belka - Доставка цветов",
+  "short_name": "Belka Flowers",
+  "description": "Служба доставки свежих цветов в Путилково и Москве. Букеты, композиции, подарки.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#d4145a",
+  "background_color": "#ffffff",
+  "lang": "ru-RU",
+  "categories": [
+    "shopping",
+    "lifestyle",
+    "business",
+    "catalog"
+  ],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Каталог товаров",
+      "short_name": "Каталог",
+      "description": "Просмотреть все товары",
+      "url": "/bukety_tsvetov",
+      "icons": [
+        {
+          "src": "/icon.svg",
+          "sizes": "any"
+        }
+      ]
+    },
+    {
+      "name": "Корзина",
+      "short_name": "Корзина",
+      "description": "Просмотреть корзину",
+      "url": "/korzina",
+      "icons": [
+        {
+          "src": "/icon.svg",
+          "sizes": "any"
+        }
+      ]
+    },
+    {
+      "name": "Категории",
+      "short_name": "Категории",
+      "description": "Просмотреть категории товаров",
+      "url": "/karta-sayta",
+      "icons": [
+        {
+          "src": "/icon.svg",
+          "sizes": "any"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "iarc_rating_id": "",
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "scope": "/",
+  "dir": "ltr"
+}

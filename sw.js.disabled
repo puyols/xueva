@@ -1,0 +1,488 @@
+/**
+ * Service Worker для улучшенной работы с изображениями
+ * Поддерживает офлайн доступ, префетчинг и интеллектуальное кэширование
+ */
+
+const CACHE_NAME = 'image-cache-v2';
+const STATIC_CACHE_NAME = 'static-cache-v1';
+const RUNTIME_CACHE_NAME = 'runtime-cache-v1';
+
+// URL паттерны для кэширования
+const IMAGE_URL_PATTERNS = [
+  /^https?:\/\/.*\.(jpg|jpeg|png|webp|avif|gif|svg)$/i,
+  /^\/images\//,
+  /^\/_next\/image\//,
+  /^https:\/\/images\.unsplash\.com/
+];
+
+// Стратегии кэширования
+const CACHE_STRATEGIES = {
+  // Cache First с fallback в сеть
+  CACHE_FIRST: 'cache-first',
+  // Network First с fallback в кэш
+  NETWORK_FIRST: 'network-first',
+  // Stale While Revalidate
+  STALE_WHILE_REVALIDATE: 'stale-while-revalidate',
+  // Network Only
+  NETWORK_ONLY: 'network-only',
+  // Cache Only
+  CACHE_ONLY: 'cache-only'
+};
+
+// Конфигурация кэширования
+const CACHE_CONFIG = {
+  maxSize: 100 * 1024 * 1024, // 100MB
+  maxEntries: 1000,
+  maxAge: 24 * 60 * 60 * 1000, // 24 часа
+  retryAttempts: 3,
+  retryDelay: 1000
+};
+
+// Логирование для отладки
+const debugLog = (message, data) => {
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`[SW Debug] ${message}`, data || '');
+  }
+};
+
+/**
+ * Установка Service Worker
+ */
+self.addEventListener('install', (event) => {
+  debugLog('Service Worker installing');
+  
+  event.waitUntil(
+    caches.open(STATIC_CACHE_NAME)
+      .then((cache) => {
+        debugLog('Static cache opened');
+        // Можно добавить префетчинг критических ресурсов
+        return cache.addAll([
+          '/images/placeholder.png',
+          '/images/placeholder-product.svg',
+          '/images/placeholder-category.svg'
+        ]);
+      })
+      .then(() => {
+        debugLog('Service Worker installed');
+        return self.skipWaiting();
+      })
+      .catch((error) => {
+        console.error('Service Worker installation failed:', error);
+      })
+  );
+});
+
+/**
+ * Активация Service Worker
+ */
+self.addEventListener('activate', (event) => {
+  debugLog('Service Worker activating');
+  
+  event.waitUntil(
+    caches.keys()
+      .then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            // Удаляем старые версии кэша
+            if (cacheName !== CACHE_NAME && 
+                cacheName !== STATIC_CACHE_NAME && 
+                cacheName !== RUNTIME_CACHE_NAME) {
+              debugLog('Deleting old cache', { cacheName });
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      })
+      .then(() => {
+        debugLog('Service Worker activated');
+        return self.clients.claim();
+      })
+      .catch((error) => {
+        console.error('Service Worker activation failed:', error);
+      })
+  );
+});
+
+/**
+ * Обработка запросов
+ */
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+  
+  // Обрабатываем только GET запросы
+  if (request.method !== 'GET') return;
+  
+  // Определяем стратегию на основе URL
+  const strategy = getCacheStrategy(request.url);
+  
+  if (strategy) {
+    event.respondWith(handleRequest(request, strategy));
+  }
+});
+
+/**
+ * Определяет стратегию кэширования на основе URL
+ */
+function getCacheStrategy(url) {
+  // Для изображений используем разные стратегии
+  if (isImageRequest(url)) {
+    if (url.includes('/_next/image/')) {
+      // Для оптимизированных Next.js изображений - Stale While Revalidate
+      return CACHE_STRATEGIES.STALE_WHILE_REVALIDATE;
+    } else if (url.includes('/images/')) {
+      // Для локальных изображений - Cache First
+      return CACHE_STRATEGIES.CACHE_FIRST;
+    } else if (url.includes('unsplash.com')) {
+      // Для внешних изображений - Network First
+      return CACHE_STRATEGIES.NETWORK_FIRST;
+    } else {
+      // Для остальных изображений - Stale While Revalidate
+      return CACHE_STRATEGIES.STALE_WHILE_REVALIDATE;
+    }
+  }
+  
+  return null;
+}
+
+/**
+ * Проверяет, является ли запрос изображением
+ */
+function isImageRequest(url) {
+  return IMAGE_URL_PATTERNS.some(pattern => pattern.test(url));
+}
+
+/**
+ * Обрабатывает запрос с указанной стратегией
+ */
+async function handleRequest(request, strategy) {
+  try {
+    switch (strategy) {
+      case CACHE_STRATEGIES.CACHE_FIRST:
+        return await cacheFirst(request);
+      case CACHE_STRATEGIES.NETWORK_FIRST:
+        return await networkFirst(request);
+      case CACHE_STRATEGIES.STALE_WHILE_REVALIDATE:
+        return await staleWhileRevalidate(request);
+      case CACHE_STRATEGIES.NETWORK_ONLY:
+        return await networkOnly(request);
+      case CACHE_STRATEGIES.CACHE_ONLY:
+        return await cacheOnly(request);
+      default:
+        return await fetch(request);
+    }
+  } catch (error) {
+    console.error('Request handling failed:', error);
+    return new Response('Service Unavailable', { status: 503 });
+  }
+}
+
+/**
+ * Стратегия Cache First
+ */
+async function cacheFirst(request) {
+  const cache = await caches.open(CACHE_NAME);
+  const cachedResponse = await cache.match(request);
+  
+  if (cachedResponse) {
+    debugLog('Cache hit', { url: request.url });
+    return cachedResponse;
+  }
+  
+  try {
+    const networkResponse = await fetch(request);
+    
+    if (networkResponse.ok) {
+      // Кэшируем успешный ответ
+      await putInCache(cache, request, networkResponse.clone());
+      debugLog('Network response cached', { url: request.url });
+    }
+    
+    return networkResponse;
+  } catch (error) {
+    console.error('Network request failed:', error);
+    
+    // Пробуем вернуть fallback из статического кэша
+    const staticCache = await caches.open(STATIC_CACHE_NAME);
+    const fallbackResponse = await staticCache.match('/images/placeholder.png');
+    
+    return fallbackResponse || new Response('Network Error', { status: 500 });
+  }
+}
+
+/**
+ * Стратегия Network First
+ */
+async function networkFirst(request) {
+  try {
+    const networkResponse = await fetchWithRetry(request);
+    
+    if (networkResponse.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      await putInCache(cache, request, networkResponse.clone());
+      debugLog('Network response cached', { url: request.url });
+    }
+    
+    return networkResponse;
+  } catch (error) {
+    console.error('Network request failed, trying cache:', error);
+    
+    const cache = await caches.open(CACHE_NAME);
+    const cachedResponse = await cache.match(request);
+    
+    if (cachedResponse) {
+      debugLog('Fallback to cache', { url: request.url });
+      return cachedResponse;
+    }
+    
+    // Пробуем fallback
+    const staticCache = await caches.open(STATIC_CACHE_NAME);
+    const fallbackResponse = await staticCache.match('/images/placeholder.png');
+    
+    return fallbackResponse || new Response('Network Error', { status: 500 });
+  }
+}
+
+/**
+ * Стратегия Stale While Revalidate
+ */
+async function staleWhileRevalidate(request) {
+  const cache = await caches.open(CACHE_NAME);
+  const cachedResponse = await cache.match(request);
+  
+  // Асинхронно обновляем кэш
+  const fetchPromise = fetchWithRetry(request)
+    .then(async (networkResponse) => {
+      if (networkResponse.ok) {
+        await putInCache(cache, request, networkResponse.clone());
+        debugLog('Cache updated', { url: request.url });
+      }
+      return networkResponse;
+    })
+    .catch((error) => {
+      console.error('Background update failed:', error);
+    });
+  
+  // Возвращаем кэшированный ответ если есть
+  if (cachedResponse) {
+    debugLog('Serving from cache', { url: request.url });
+    return cachedResponse;
+  }
+  
+  // Иначе ждем ответа сети
+  try {
+    return await fetchPromise;
+  } catch (error) {
+    // Пробуем fallback
+    const staticCache = await caches.open(STATIC_CACHE_NAME);
+    const fallbackResponse = await staticCache.match('/images/placeholder.png');
+    
+    return fallbackResponse || new Response('Network Error', { status: 500 });
+  }
+}
+
+/**
+ * Стратегия Network Only
+ */
+async function networkOnly(request) {
+  return await fetchWithRetry(request);
+}
+
+/**
+ * Стратегия Cache Only
+ */
+async function cacheOnly(request) {
+  const cache = await caches.open(CACHE_NAME);
+  const cachedResponse = await cache.match(request);
+  
+  if (cachedResponse) {
+    return cachedResponse;
+  }
+  
+  return new Response('Not in cache', { status: 404 });
+}
+
+/**
+ * Добавляет ответ в кэш с проверкой лимитов
+ */
+async function putInCache(cache, request, response) {
+  // Проверяем размер ответа
+  const responseClone = response.clone();
+  const contentLength = responseClone.headers.get('content-length');
+  
+  if (contentLength && parseInt(contentLength) > CACHE_CONFIG.maxSize) {
+    debugLog('Response too large for cache', { 
+      url: request.url, 
+      size: contentLength 
+    });
+    return;
+  }
+  
+  // Проверяем количество записей
+  const keys = await cache.keys();
+  if (keys.length >= CACHE_CONFIG.maxEntries) {
+    await cleanupCache(cache);
+  }
+  
+  await cache.put(request, response);
+}
+
+/**
+ * Очищает старые записи из кэша
+ */
+async function cleanupCache(cache) {
+  const keys = await cache.keys();
+  const entries = [];
+  
+  for (const request of keys) {
+    const response = await cache.match(request);
+    if (response) {
+      const timestamp = response.headers.get('x-cache-timestamp');
+      const date = timestamp ? parseInt(timestamp) : 0;
+      entries.push({ request, date });
+    }
+  }
+  
+  // Сортируем по времени добавления
+  entries.sort((a, b) => a.date - b.date);
+  
+  // Удаляем 20% самых старых записей
+  const toDelete = Math.ceil(entries.length * 0.2);
+  for (let i = 0; i < toDelete; i++) {
+    await cache.delete(entries[i].request);
+  }
+  
+  debugLog('Cache cleanup completed', { deleted: toDelete });
+}
+
+/**
+ * Повторная попытка запроса с экспоненциальным backoff
+ */
+async function fetchWithRetry(request, attempt = 1) {
+  try {
+    const response = await fetch(request);
+    
+    // Добавляем timestamp в заголовки для отслеживания
+    if (response.ok) {
+      const responseClone = response.clone();
+      const cache = await caches.open(RUNTIME_CACHE_NAME);
+      await cache.put(request, responseClone);
+    }
+    
+    return response;
+  } catch (error) {
+    if (attempt < CACHE_CONFIG.retryAttempts) {
+      const delay = CACHE_CONFIG.retryDelay * Math.pow(2, attempt - 1);
+      debugLog(`Retry attempt ${attempt}`, { 
+        url: request.url, 
+        delay 
+      });
+      
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return fetchWithRetry(request, attempt + 1);
+    }
+    
+    throw error;
+  }
+}
+
+/**
+ * Обработка сообщений от клиента
+ */
+self.addEventListener('message', (event) => {
+  const { type, payload } = event.data;
+  
+  switch (type) {
+    case 'SKIP_WAITING':
+      self.skipWaiting();
+      break;
+      
+    case 'GET_CACHE_STATS':
+      getCacheStats().then(stats => {
+        event.ports[0].postMessage({ type: 'CACHE_STATS', payload: stats });
+      });
+      break;
+      
+    case 'CLEAR_CACHE':
+      clearAllCaches().then(() => {
+        event.ports[0].postMessage({ type: 'CACHE_CLEARED' });
+      });
+      break;
+      
+    case 'PRECACHE_IMAGES':
+      precacheImages(payload.urls).then(() => {
+        event.ports[0].postMessage({ type: 'PRECACHE_COMPLETED' });
+      });
+      break;
+  }
+});
+
+/**
+ * Получает статистику кэша
+ */
+async function getCacheStats() {
+  const stats = {};
+  
+  for (const cacheName of [CACHE_NAME, STATIC_CACHE_NAME, RUNTIME_CACHE_NAME]) {
+    const cache = await caches.open(cacheName);
+    const keys = await cache.keys();
+    let totalSize = 0;
+    
+    for (const request of keys) {
+      const response = await cache.match(request);
+      if (response) {
+        const contentLength = response.headers.get('content-length');
+        if (contentLength) {
+          totalSize += parseInt(contentLength);
+        }
+      }
+    }
+    
+    stats[cacheName] = {
+      entries: keys.length,
+      size: totalSize
+    };
+  }
+  
+  return stats;
+}
+
+/**
+ * Очищает все кэши
+ */
+async function clearAllCaches() {
+  const cacheNames = await caches.keys();
+  
+  await Promise.all(
+    cacheNames.map(cacheName => caches.delete(cacheName))
+  );
+  
+  debugLog('All caches cleared');
+}
+
+/**
+ * Предварительно кэширует изображения
+ */
+async function precacheImages(urls) {
+  const cache = await caches.open(CACHE_NAME);
+  
+  const precachePromises = urls.map(async (url) => {
+    try {
+      const response = await fetch(url);
+      if (response.ok) {
+        await putInCache(cache, new Request(url), response);
+        debugLog('Image precached', { url });
+      }
+    } catch (error) {
+      console.error('Failed to precache image:', url, error);
+    }
+  });
+  
+  await Promise.allSettled(precachePromises);
+  debugLog('Precache completed', { urls: urls.length });
+}
+
+// Экспортируем функции для тестирования
+self.getCacheStats = getCacheStats;
+self.clearAllCaches = clearAllCaches;
+self.precacheImages = precacheImages;
