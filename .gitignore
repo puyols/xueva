@@ -58,3 +58,8 @@ server*.log
 # OS
 Thumbs.db
 Desktop.ini
+
+# Deployment archives
+*.tar.gz
+*.zip
+belka-flowers-deploy*
